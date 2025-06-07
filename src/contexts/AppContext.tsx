@@ -40,6 +40,7 @@ const DEFAULT_STATE: AppState = {
 // Validation service configuration
 const VALIDATION_ENDPOINT = import.meta.env.VITE_VALIDATION_ENDPOINT || 'https://n8n.ideanexusventures.com/webhook/c5534b62-e4bb-4921-99ed-26bcb2aadf7b';
 const VALIDATION_TOKEN = import.meta.env.VITE_VALIDATION_TOKEN || 'https://n8n.ideanexusventures.com/webhook-test/c5534b62-e4bb-4921-99ed-26bcb2aadf7b';
+const ADD_UNVERIFIED_CLICK_ENDPOINT = import.meta.env.VITE_ADD_UNVERIFIED_CLICK_ENDPOINT || 'https://n8n.ideanexusventures.com/webhook/add-unverified-click';
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AppState>(() => {
@@ -190,8 +191,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setState(prev => ({ ...prev, statusMessage: message }));
   };
 
-  const incrementTicketsClaimed = () => {
-    setState(prev => ({ ...prev, ticketsClaimed: prev.ticketsClaimed + 1 }));
+  const incrementTicketsClaimed = async () => {
+    try {
+      const response = await fetch(ADD_UNVERIFIED_CLICK_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${VALIDATION_TOKEN}`
+        },
+        body: JSON.stringify({})
+      });
+      
+      if (response.ok) {
+        setState(prev => ({ ...prev, ticketsClaimed: prev.ticketsClaimed + 1 }));
+      } else {
+        console.error('Failed to record unverified click');
+      }
+    } catch (error) {
+      console.error('Error recording unverified click:', error);
+    }
   };
 
   const checkValidation = async () => {
