@@ -198,11 +198,9 @@ export function LandingPage() {
               Not a security offering. This is about vibes, vision, and collective action.
             </p>
             <p className="text-white/60 text-sm">
-              Contact: <span className="text-white/80">info@up4thechallenge.org</span>
+              Contact: <span className="text-white/80">leo@buildinpublicuniversity.com</span>
             </p>
-            <p className="text-white/60 text-xs mt-2">
-              Validation endpoint: {import.meta.env.VITE_VALIDATION_ENDPOINT || 'Demo mode'}
-            </p>
+            
           </div>
         </footer>
       </div>
