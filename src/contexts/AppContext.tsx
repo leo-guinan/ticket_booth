@@ -8,6 +8,11 @@ interface AppState {
   isUnlocked: boolean;
   lastValidationCheck: number;
   validationInProgress: boolean;
+  generationResult: {
+    status: string;
+    image: string;
+    story: string;
+  } | null;
 }
 
 interface AppContextType {
@@ -16,8 +21,9 @@ interface AppContextType {
   updateTicketsVerified: (count: number) => void;
   updateGoal: (goal: number) => void;
   updateStatusMessage: (message: string) => void;
-  incrementTicketsClaimed: () => void;
+  incrementTicketsClaimed: () => Promise<void>;
   checkValidation: () => Promise<void>;
+  generateFuture: (description: string) => Promise<string>;
 }
 
 interface ValidationResponse {
@@ -34,13 +40,15 @@ const DEFAULT_STATE: AppState = {
   statusMessage: "The future awaits your contribution. Every verified ticket brings us closer to unlocking tomorrow's possibilities.",
   isUnlocked: false,
   lastValidationCheck: Date.now(),
-  validationInProgress: false
+  validationInProgress: false,
+  generationResult: null
 };
 
 // Validation service configuration
 const VALIDATION_ENDPOINT = import.meta.env.VITE_VALIDATION_ENDPOINT || 'https://n8n.ideanexusventures.com/webhook/c5534b62-e4bb-4921-99ed-26bcb2aadf7b';
 const VALIDATION_TOKEN = import.meta.env.VITE_VALIDATION_TOKEN || 'https://n8n.ideanexusventures.com/webhook-test/c5534b62-e4bb-4921-99ed-26bcb2aadf7b';
 const ADD_UNVERIFIED_CLICK_ENDPOINT = import.meta.env.VITE_ADD_UNVERIFIED_CLICK_ENDPOINT || 'https://n8n.ideanexusventures.com/webhook/add-unverified-click';
+const GENERATE_FUTURE_ENDPOINT = import.meta.env.VITE_GENERATE_FUTURE_ENDPOINT || 'https://n8n.ideanexusventures.com/webhook/generate-future';
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AppState>(() => {
@@ -67,7 +75,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
             ? parsed.lastValidationCheck 
             : DEFAULT_STATE.lastValidationCheck,
           isUnlocked: false, // Will be recalculated below
-          validationInProgress: false
+          validationInProgress: false,
+          generationResult: null
         };
         
         // Calculate isUnlocked based on validated numbers
@@ -242,6 +251,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const generateFuture = async (description: string): Promise<string> => {
+    try {
+      const response = await fetch(GENERATE_FUTURE_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${VALIDATION_TOKEN}`
+        },
+        body: JSON.stringify({ description })
+      });
+
+      if (!response.ok) throw new Error('Failed to generate future');
+
+      const data = await response.json();
+      console.log(data)
+      // Expect data to have a unique id or filename for lookup
+      return data.id || data.filename || '';
+    } catch (error) {
+      console.error('Error generating future:', error);
+      throw error;
+    }
+  };
+
   return (
     <AppContext.Provider value={{
       state,
@@ -250,7 +282,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateGoal,
       updateStatusMessage,
       incrementTicketsClaimed,
-      checkValidation
+      checkValidation,
+      generateFuture
     }}>
       {children}
     </AppContext.Provider>

@@ -5,15 +5,40 @@ import { DualProgressBar } from '../components/DualProgressBar';
 import { PaymentInstructions } from '../components/PaymentInstructions';
 import { CurrencyConverter } from '../components/CurrencyConverter';
 import { TicketModal } from '../components/TicketModal';
+import { FutureDescriptionModal } from '../components/FutureDescriptionModal';
+import { GenerationStatusModal } from '../components/GenerationStatusModal';
 import { CosmicBackground } from '../components/CosmicBackground';
+import { useNavigate } from 'react-router-dom';
 
 export function LandingPage() {
-  const { state, incrementTicketsClaimed, checkValidation } = useApp();
-  const [showModal, setShowModal] = useState(false);
+  const { state, incrementTicketsClaimed, checkValidation, generateFuture } = useApp();
+  const [showTicketModal, setShowTicketModal] = useState(false);
+  const [showFutureModal, setShowFutureModal] = useState(false);
+  const [showGenerationModal, setShowGenerationModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
-  const handleTicketClaim = () => {
-    incrementTicketsClaimed();
-    setShowModal(true);
+  const handleTicketClaim = async () => {
+    await incrementTicketsClaimed();
+    setShowFutureModal(true);
+  };
+
+  const handleFutureSubmit = async (description: string) => {
+    try {
+      setIsSubmitting(true);
+      const id = await generateFuture(description);
+      setShowFutureModal(false);
+      navigate(`/future/${id}`);
+    } catch (error) {
+      console.error('Error submitting future:', error);
+      alert('Failed to submit your future vision. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGenerationComplete = () => {
+    setShowTicketModal(true);
   };
 
   const handleManualValidationCheck = () => {
@@ -183,9 +208,23 @@ export function LandingPage() {
       </div>
 
       <TicketModal 
-        isOpen={showModal} 
-        onClose={() => setShowModal(false)}
+        isOpen={showTicketModal} 
+        onClose={() => setShowTicketModal(false)}
         isUnlocked={state.isUnlocked}
+      />
+
+      <FutureDescriptionModal
+        isOpen={showFutureModal}
+        onClose={() => setShowFutureModal(false)}
+        onSubmit={handleFutureSubmit}
+        isSubmitting={isSubmitting}
+      />
+
+      <GenerationStatusModal
+        isOpen={showGenerationModal}
+        onClose={() => setShowGenerationModal(false)}
+        result={state.generationResult}
+        onShare={handleGenerationComplete}
       />
     </div>
   );
