@@ -17,40 +17,19 @@ export function PaymentInstructions({ onTicketClaim }: PaymentInstructionsProps)
       
       
       {/* Manual Instructions */}
-      <div className="bg-black/30 rounded-xl p-6 border border-purple-500/20">
-        <h4 className="text-white font-semibold mb-4 text-center">Payment Instructions</h4>
-        
-        <div className="space-y-3">
-          <div>
-            <label className="text-white/70 text-sm">Send to:</label>
-            <div className="flex items-center gap-2 mt-1">
-              <div className="flex-1 bg-black/40 px-3 py-2 rounded-lg border border-purple-500/20">
-                <span className="text-white font-mono text-sm">{paypalEmail}</span>
-              </div>
-              <button
-                onClick={copyEmail}
-                className="p-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
-                title="Copy email"
-              >
-                <Copy size={16} className="text-white" />
-              </button>
-            </div>
-          </div>
-          
-          <div>
-            <label className="text-white/70 text-sm">Amount:</label>
-            <div className="bg-black/40 px-3 py-2 rounded-lg border border-purple-500/20 mt-1">
-              <span className="text-white font-bold">£1.00 GBP</span>
-            </div>
-          </div>
-          
-          <div>
-            <label className="text-white/70 text-sm">Note (optional):</label>
-            <div className="bg-black/40 px-3 py-2 rounded-lg border border-purple-500/20 mt-1">
-              <span className="text-white/80 text-sm">Ticket to the Future</span>
-            </div>
-          </div>
-        </div>
+      <div className="bg-black/30 rounded-xl p-6 border border-purple-500/20 text-center">
+        <h4 className="text-white font-semibold mb-4">Payment Instructions</h4>
+        <a
+          href="https://www.paypal.biz/ticketstothefuture"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl text-lg transition-all duration-200 shadow-lg"
+        >
+          Pay with PayPal
+        </a>
+        <p className="text-white/70 mt-4">
+          Click the button above to pay £1 for your Ticket to the Future.
+        </p>
       </div>
       
       {/* Claim Button */}
